@@ -1,0 +1,32 @@
+body {
+  font-family: Inter;
+}
+/* Анимации плавное появление для перехода по страницам и модального окна */
+.fade-enter-active, .fade-leave-active {
+  transition: opacity .3s;
+}
+.fade-enter, .fade-leave-to /* .fade-leave-active below version 2.1.8 */ {
+  opacity: 0;
+}
+
+ /* Начало стилей для скролбара */
+.scrollbar::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+.scrollbar::-webkit-scrollbar-track {
+  border-radius: 100vh;
+  background: #fff;
+}
+
+.scrollbar::-webkit-scrollbar-thumb {
+  background: #0a7194;
+  border-radius: 100vh;
+  border: 3px solid #fff;
+}
+
+.scrollbar::-webkit-scrollbar-thumb:hover {
+  background: #0a7194;
+}
+/* Конец стилей скролбара */

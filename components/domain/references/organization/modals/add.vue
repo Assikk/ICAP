@@ -1,0 +1,192 @@
+<template>
+  <div
+    class="fixed top-0 bg-[#00000046] left-0 w-full h-full z-10 flex items-center justify-center"
+  >
+    <div
+      class="absolute top-0 left-0 w-full h-full"
+      @click="show_addSuborganization(false)"
+    />
+    <div
+      class="relative overflow-y-auto bg-white rounded-md flex flex-col justify-between p-6"
+    >
+      <div class="mt-3">
+        <div class="flex justify-between pb-8">
+          <div>
+            <h3
+              class="text-lg font-medium leading-6 text-gray-900"
+              id="modal-title"
+            >
+              Добавить организацию
+            </h3>
+          </div>
+          <div class="cursor-pointer" @click="show_addSuborganization(false)">
+            <img src="@/assets/img/close-icon.svg" alt="close" />
+          </div>
+        </div>
+        <div class="grid gap-8 mb-8">
+          <div class="flex justify-between gap-x-4">
+            <Input
+              label="Организация (RU)*"
+              id="name_ru"
+              v-model="name_ru"
+              placeholder="Введите название области"
+              :error="$v.name_ru.$dirty && !$v.name_ru.required"
+            >
+              <template #error>
+                <span v-if="$v.name_ru.$dirty && !$v.name_ru.required">
+                  Это обязательное поле!
+                </span>
+              </template>
+            </Input>
+            <Input
+              label="Организация (KZ)*"
+              id="name_kk"
+              v-model="name_kk"
+              placeholder="Введите название области"
+              :error="$v.name_kk.$dirty && !$v.name_kk.required"
+            >
+              <template #error>
+                <span v-if="$v.name_kk.$dirty && !$v.name_kk.required">
+                  Это обязательное поле!
+                </span>
+              </template>
+            </Input>
+          </div>
+          <div class="flex justify-between gap-x-4">
+            <Input
+              label="Сокращенное название (RU) *"
+              id="short_name_ru"
+              v-model="short_name_ru"
+              placeholder="Введите название области"
+              :error="$v.short_name_ru.$dirty && !$v.short_name_ru.required"
+            >
+              <template #error>
+                <span
+                  v-if="$v.short_name_ru.$dirty && !$v.short_name_ru.required"
+                >
+                  Это обязательное поле!
+                </span>
+              </template>
+            </Input>
+            <Input
+              label="Сокращенное название (KZ) *"
+              id="short_name_kk"
+              v-model="short_name_kk"
+              placeholder="Введите название области"
+              :error="$v.short_name_kk.$dirty && !$v.short_name_kk.required"
+            >
+              <template #error>
+                <span
+                  v-if="$v.short_name_kk.$dirty && !$v.short_name_kk.required"
+                >
+                  Это обязательное поле!
+                </span>
+              </template>
+            </Input>
+          </div>
+          <div class="flex justify-between gap-x-4">
+            <Input
+              label="БИН"
+              type="number"
+              id="bin"
+              v-model="bin"
+              class="w-full"
+              placeholder="Введите название области"
+              :error="$v.bin.$dirty && !$v.bin.required"
+            >
+              <template #error>
+                <span v-if="$v.bin.$dirty && !$v.bin.required">
+                  Это обязательное поле!
+                </span>
+              </template>
+            </Input>
+          </div>
+        </div>
+      </div>
+      <div class="flex gap-4 justify-end py-3 border-t border-t-[#E5E7EB]">
+        <Button white medium @click="show_addSuborganization(false)">
+          Отмена
+        </Button>
+        <Button medium @click="addSuborganization"> Добавить </Button>
+      </div>
+    </div>
+  </div>
+</template>
+
+<script>
+import { mapMutations, mapActions } from 'vuex'
+import { required } from 'vuelidate/lib/validators'
+import Tabs from '~/components/ui/tabs/full.vue'
+import Button from '@/components/ui/buttons/default.vue'
+import LoadingDots from '@/components/ui/loading/dots.vue'
+import Input from '@/components/ui/inputs/default.vue'
+
+export default {
+  name: 'AddVehiclesModal',
+  components: {
+    Tabs,
+    Button,
+    LoadingDots,
+    Input,
+  },
+  data() {
+    return {
+      activeTab: 1,
+      isLoading: false,
+      name_ru: '',
+      name_kk: '',
+      short_name_ru: '',
+      short_name_kk: '',
+      bin: '',
+    }
+  },
+  validations: {
+    name_ru: { required },
+    name_kk: { required },
+    short_name_ru: { required },
+    short_name_kk: { required },
+    bin: { required },
+  },
+  methods: {
+    ...mapMutations({
+      show_addSuborganization: 'suborganization/SHOW_ADDSUBORGANIZATION',
+      loading_alert: 'alert/LOADING_ALERT',
+    }),
+    ...mapActions({
+      success_alert: 'alert/success_alert',
+      error_alert: 'alert/error_alert',
+      create_suborganization: 'suborganization/create_suborganization',
+    }),
+    async addSuborganization() {
+      if (this.$v.$invalid) {
+        this.$v.$touch()
+        return
+      }
+      try {
+        await this.create_suborganization({
+          name_ru: this.name_ru,
+          name_kk: this.name_kk,
+          short_name_ru: this.short_name_ru,
+          short_name_kk: this.short_name_kk,
+          bin: this.bin,
+        })
+        this.success_alert('Организация успешно добавлен')
+        this.show_addSuborganization(false)
+      } catch (err) {
+        const errors = []
+        if (err.response?.data) {
+          for (let key in err.response.data) {
+            errors.push(`${key} - ${err.response.data[key][0]}`)
+          }
+        } else {
+          errors.push('Ошибка при добавлении Организации')
+        }
+        this.error_alert(errors)
+      }
+    },
+  },
+  async mounted() {
+    this.isLoading = false
+  },
+}
+</script>
